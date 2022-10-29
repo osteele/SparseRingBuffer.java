@@ -49,16 +49,18 @@ public class SparseRingBufferTest {
     assertEquals(buffer.get(10), 1);
     assertEquals(buffer.toString(), "{10:1}");
 
+    // overwrite
     buffer.put(10, 2);
     assertEquals(buffer.get(10), 2);
     assertEquals(buffer.toString(), "{10:2}");
 
+    // add two more elements
     buffer.put(20, 3);
     assertEquals(buffer.get(10), 2);
     assertEquals(buffer.get(20), 3);
     assertEquals(buffer.toString(), "{10:2,20:3}");
 
-    // test wrapping
+    // wrap buffer length; don't erase first element
     buffer = new SparseRingBuffer(100);
     buffer.put(10, 1);
     buffer.put(20, 2);
@@ -68,7 +70,7 @@ public class SparseRingBufferTest {
     assertEquals(buffer.size(), 3);
     assertEquals(buffer.toString(), "{10:1,20:2,105:3}");
 
-    // wrap onto the first element
+    // wrap buffer length; overwrite the first element
     buffer = new SparseRingBuffer(100);
     buffer.put(10, 1);
     buffer.put(20, 2);
@@ -79,7 +81,7 @@ public class SparseRingBufferTest {
     assertEquals(buffer.get(110), 3);
     assertEquals(buffer.toString(), "{20:2,110:3}");
 
-    // wrap past the first element
+    // wrap buffer length; pass the first element
     buffer = new SparseRingBuffer(100);
     buffer.put(10, 1);
     buffer.put(20, 2);
@@ -89,6 +91,17 @@ public class SparseRingBufferTest {
     assertEquals(buffer.get(20), 2);
     assertEquals(buffer.get(115), 3);
     assertEquals(buffer.toString(), "{20:2,115:3}");
+
+    // wrap past all values (uses different code path)
+    buffer = new SparseRingBuffer(100);
+    buffer.put(10, 1);
+    buffer.put(20, 2);
+    buffer.put(130, 3);
+    assertEquals(buffer.size(), 1);
+    assertFalse(buffer.containsKey(10));
+    assertFalse(buffer.containsKey(20));
+    assertEquals(buffer.get(130), 3);
+    assertEquals(buffer.toString(), "{130:3}");
   }
 
   @Test

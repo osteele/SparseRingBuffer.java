@@ -26,6 +26,14 @@ public class SparseRingBuffer implements Iterable<BufferEntry> {
     this.nextIndices = new int[size];
   }
 
+  public void clear() {
+    bufferStartKey = -1;
+    firstIndex = -1;
+    lastIndex = -1;
+    firstIndexKey = -1;
+    count = 0;
+  }
+
   public boolean isEmpty() {
     return count == 0;
   }
@@ -90,6 +98,16 @@ public class SparseRingBuffer implements Iterable<BufferEntry> {
   }
 
   void removeBefore(int key) {
+    // This is necessary to guard the fast path.
+    if (lastIndex < 0) {
+      return;
+    }
+    // fast path detects when the entire buffer would be cleared. This is
+    // functionally identical to the slow path.
+    if (getKeyForIndex(lastIndex) < key) {
+      clear();
+      return;
+    }
     while (count > 0 && firstIndexKey < key) {
       removeFirstEntry();
     }
