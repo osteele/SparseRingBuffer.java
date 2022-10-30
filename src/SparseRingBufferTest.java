@@ -45,20 +45,43 @@ public class SparseRingBufferTest {
   void testPut() {
     var buffer = new SparseRingBuffer(100);
     buffer.put(10, 1);
+    assertEquals(buffer.size(), 1);
     assertTrue(buffer.containsKey(10));
     assertEquals(buffer.get(10), 1);
     assertEquals(buffer.toString(), "{10:1}");
 
-    // overwrite
+    // overwrite existing element
     buffer.put(10, 2);
+    assertEquals(buffer.size(), 1);
     assertEquals(buffer.get(10), 2);
     assertEquals(buffer.toString(), "{10:2}");
 
-    // add two more elements
+    // add a second element
     buffer.put(20, 3);
+    assertEquals(buffer.size(), 2);
     assertEquals(buffer.get(10), 2);
     assertEquals(buffer.get(20), 3);
     assertEquals(buffer.toString(), "{10:2,20:3}");
+
+    // insert before first element
+    buffer = new SparseRingBuffer(100);
+    buffer.put(10, 1);
+    buffer.put(20, 2);
+    buffer.put(5, 3);
+    assertEquals(buffer.size(), 3);
+    assertTrue(buffer.containsKey(5));
+    assertEquals(buffer.get(5), 3);
+    assertEquals(buffer.toString(), "{5:3,10:1,20:2}");
+
+    // insert between two elements
+    buffer = new SparseRingBuffer(100);
+    buffer.put(10, 1);
+    buffer.put(20, 2);
+    buffer.put(15, 3);
+    assertEquals(buffer.size(), 3);
+    assertTrue(buffer.containsKey(15));
+    assertEquals(buffer.get(15), 3);
+    assertEquals(buffer.toString(), "{10:1,15:3,20:2}");
 
     // wrap buffer length; don't erase first element
     buffer = new SparseRingBuffer(100);
